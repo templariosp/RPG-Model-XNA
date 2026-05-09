@@ -11,6 +11,7 @@ namespace RPGModel
         private KeyboardState keyboardStateOld;
         private Vector2 position = new Vector2(500, 300);
 
+        public bool Dead = false;
         public Vector2 Position { get { return position; } }
         public SpriteAnimation animation;
         public SpriteAnimation[] animations = new SpriteAnimation[4];
@@ -59,21 +60,28 @@ namespace RPGModel
             if (keyState.IsKeyDown(Keys.Escape))
                 isMoving = false;
 
+            if(Dead)
+                isMoving = false;
+
             if(isMoving)
             {
                 switch(direction)
                 {
                     case Direction.Right:
-                        position.X += speed * deltaTime;
+                        if(position.X < 1275)
+                            position.X += speed * deltaTime;
                         break;
                     case Direction.Left:
-                        position.X -= speed * deltaTime;
+                        if(position.X > 225)
+                            position.X -= speed * deltaTime;
                         break;
                     case Direction.Down:
-                        position.Y += speed * deltaTime;
+                        if(position.Y < 1250)
+                            position.Y += speed * deltaTime;
                         break;
                     case Direction.Up:
-                        position.Y -= speed * deltaTime;
+                        if(position.Y > 200)
+                            position.Y -= speed * deltaTime;
                         break;
                 }   
             }

@@ -10,7 +10,7 @@ namespace RPGModel
         Down,
         Up,
         Left,
-        Right   
+        Right
     }
 
     public class Game1 : Game
@@ -79,13 +79,43 @@ namespace RPGModel
 
             player.Update(gameTime);
 
+            if(!player.Dead)
+                Controller.Update(gameTime, skull);
+
             camera.Position = player.Position;
             camera.Update(gameTime);
 
             foreach (Projectile projectile in Projectile.projectiles)
-            { 
+            {
                 projectile.Update(gameTime);
             }
+
+            foreach (Enemy enemy in Enemy.enemies)
+            {
+                enemy.Update(gameTime, player.Position, player.Dead);
+
+                int sum = 32 + enemy.radius;
+
+                if(Vector2.Distance(player.Position, enemy.Position) < sum)
+                    player.Dead = true;
+            }
+
+            foreach (Projectile projectile in Projectile.projectiles)
+            {
+                foreach (Enemy enemy in Enemy.enemies)
+                {
+                    int sum = projectile.Radius + enemy.radius;
+
+                    if (Vector2.Distance(projectile.Position, enemy.Position) < sum)
+                    { 
+                        projectile.Collided = true;
+                        enemy.Dead = true;
+                    }
+                } 
+            }
+
+            Projectile.projectiles.RemoveAll(p => p.Collided);
+            Enemy.enemies.RemoveAll(p => p.Dead);
 
             base.Update(gameTime);
         }
@@ -103,7 +133,13 @@ namespace RPGModel
                 _spriteBatch.Draw(ball, new Vector2(projectile.Position.X - 48, projectile.Position.Y - 48), Color.White);
             }
 
-            player.animation.Draw(_spriteBatch);
+            foreach (Enemy enemy in Enemy.enemies)
+            {
+                enemy.animation.Draw(_spriteBatch);
+            }
+
+            if(!player.Dead)
+                player.animation.Draw(_spriteBatch);
 
             _spriteBatch.End();
 
