@@ -8,6 +8,7 @@ namespace RPGModel
         private bool isMoving = false;
         private int speed = 300;
         private Direction direction = Direction.Down;
+        private KeyboardState keyboardStateOld;
         private Vector2 position = new Vector2(500, 300);
 
         public Vector2 Position { get { return position; } }
@@ -55,6 +56,9 @@ namespace RPGModel
                 isMoving = true;
             }
 
+            if (keyState.IsKeyDown(Keys.Escape))
+                isMoving = false;
+
             if(isMoving)
             {
                 switch(direction)
@@ -78,10 +82,17 @@ namespace RPGModel
 
             animation.Position = new Vector2(position.X - 48, position.Y - 48);
 
-            if (isMoving)
+            if (keyState.IsKeyDown(Keys.Space))
+                animation.SetFrame(0);
+            else if (isMoving)
                 animation.Update(gameTime);
             else
                 animation.SetFrame(1);
+
+            if (keyState.IsKeyDown(Keys.Space) && keyboardStateOld.IsKeyUp(Keys.Space))
+                Projectile.projectiles.Add(new Projectile(position, direction));
+
+            keyboardStateOld = keyState;
         }
     }
 }
