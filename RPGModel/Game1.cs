@@ -1,9 +1,18 @@
-﻿using Microsoft.Xna.Framework;
+﻿using Comora;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
 namespace RPGModel
 {
+    enum Direction
+    {
+        Down,
+        Up,
+        Left,
+        Right   
+    }
+
     public class Game1 : Game
     {
         private GraphicsDeviceManager _graphics;
@@ -19,6 +28,10 @@ namespace RPGModel
         Texture2D ball;
         Texture2D skull;
 
+        Player player = new Player();
+
+        Camera camera;
+
         public Game1()
         {
             _graphics = new GraphicsDeviceManager(this);
@@ -31,6 +44,8 @@ namespace RPGModel
             _graphics.PreferredBackBufferWidth = 1280;
             _graphics.PreferredBackBufferHeight = 720;
             _graphics.ApplyChanges();
+
+            camera = new Camera(_graphics.GraphicsDevice);
 
             base.Initialize();
         }
@@ -48,6 +63,13 @@ namespace RPGModel
             background = Content.Load<Texture2D>("background");
             ball = Content.Load<Texture2D>("ball");
             skull = Content.Load<Texture2D>("skull");
+
+            player.animations[0] = new SpriteAnimation(walkDown, 4, 8);
+            player.animations[1] = new SpriteAnimation(walkUp, 4, 8);
+            player.animations[2] = new SpriteAnimation(walkLeft, 4, 8);
+            player.animations[3] = new SpriteAnimation(walkRight, 4, 8);
+
+            player.animation = player.animations[0];
         }
 
         protected override void Update(GameTime gameTime)
@@ -55,7 +77,10 @@ namespace RPGModel
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            // TODO: Add your update logic here
+            player.Update(gameTime);
+
+            camera.Position = player.Position;
+            camera.Update(gameTime);
 
             base.Update(gameTime);
         }
@@ -64,9 +89,10 @@ namespace RPGModel
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            _spriteBatch.Begin();
+            _spriteBatch.Begin(camera);
 
             _spriteBatch.Draw(background, new Vector2(-500, -500), Color.White);
+            player.animation.Draw(_spriteBatch);
 
             _spriteBatch.End();
 
